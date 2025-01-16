@@ -1,12 +1,15 @@
 mod build;
 mod new;
-
+mod publish;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "hajime")]
-#[command(about = "A Rust CLI for Python project management", long_about = None)]
+#[command(about = "A Rust CLI for Python project management", long_about = None, version = env!("CARGO_PKG_VERSION"))]
 struct Cli {
+    #[arg(short, long, action = clap::ArgAction::Count)]
+    verbose: u8,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -28,6 +31,16 @@ enum Commands {
     },
     /// Build the Python project
     Build,
+    /// Log in to PyPI by storing the token securely
+    Publish {
+        /// PyPI account to use (default if not specified)
+        #[arg(short, long, help = "PyPI account to use for publishing")]
+        account: Option<String>,
+
+        /// Override the token for the specified account
+        #[arg(long, help = "Override the token for the specified account")]
+        override_token: bool,
+    },
 }
 
 fn main() {
@@ -43,5 +56,13 @@ fn main() {
             }
         }
         Commands::Build => build::build_project(),
+        Commands::Publish {
+            account,
+            override_token,
+        } => {
+            if let Err(e) = publish::publish_package(account.clone(), *override_token) {
+                eprintln!("Error publishing package: {}", e);
+            }
+        }
     }
 }

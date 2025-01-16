@@ -1,4 +1,4 @@
-use std::process::{Command, Output};
+use std::process::{Command, Stdio};
 
 pub fn build_project() {
     // Step 1: Check if `python3` is available
@@ -9,13 +9,29 @@ pub fn build_project() {
 
     // Step 2: Attempt to run `python3 -m build`
     println!("Building the Python project...");
-    let build_output = Command::new("python3").arg("-m").arg("build").output();
+    // Use Command to execute `python3 -m build` and stream output
+    let command = Command::new("python3")
+        .arg("-m")
+        .arg("build")
+        .stdout(Stdio::inherit()) // Stream stdout to hajime's stdout
+        .stderr(Stdio::inherit()) // Stream stderr to hajime's stderr
+        .spawn();
 
-    handle_command_output(
-        build_output,
-        "Build successful!",
-        "Build failed. If `build` is missing, install it with `pip install build`.",
-    );
+    match command {
+        Ok(mut child) => {
+            let status = child.wait().expect("Failed to wait on child process");
+            if status.success() {
+                println!("Build successful!");
+            } else {
+                eprintln!(
+                    "Build failed. If `build` is missing, install it with `pip install build`."
+                );
+            }
+        }
+        Err(e) => {
+            eprintln!("Error running command: {}", e);
+        }
+    }
 }
 
 // Helper function to check if `python3` is available
@@ -25,27 +41,4 @@ fn is_python_available() -> bool {
         .output()
         .map(|output| output.status.success())
         .unwrap_or(false)
-}
-
-// Helper function to handle command output
-fn handle_command_output(
-    output: Result<Output, std::io::Error>,
-    success_msg: &str,
-    failure_msg: &str,
-) {
-    match output {
-        Ok(output) if output.status.success() => {
-            println!("{}", success_msg);
-        }
-        Ok(output) => {
-            eprintln!(
-                "{}:\n{}",
-                failure_msg,
-                String::from_utf8_lossy(&output.stderr)
-            );
-        }
-        Err(e) => {
-            eprintln!("Error running command: {}", e);
-        }
-    }
 }
