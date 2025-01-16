@@ -67,6 +67,7 @@ description = "A Python project named {project_name}"
 authors = []
 requires-python = ">=3.9.0"
 dependencies = []
+readme = {{file = "README.md", content-type = "text/markdown"}}
 
 [project.optional-dependencies]
 dev = [
