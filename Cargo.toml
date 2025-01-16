@@ -1,7 +1,15 @@
 [package]
 name = "hajime"
 version = "0.1.0"
+description = "A Rust CLI tool to create Python project skeletons"
+readme = "README.md" # Path to your README file
+homepage = "https://github.com/huangziwei/hajime"
+repository = "https://github.com/huangziwei/hajime"
+license = "MIT"
+keywords = ["cli", "python", "project-management"] 
+categories = ["command-line-utilities"]
 edition = "2021"
+
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
