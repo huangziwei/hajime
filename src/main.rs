@@ -38,7 +38,11 @@ enum Commands {
         account: Option<String>,
 
         /// Override the token for the specified account
-        #[arg(long, help = "Override the token for the specified account")]
+        #[arg(
+            short = 'o',
+            long = "override-token",
+            help = "Override the token for the specified account"
+        )]
         override_token: bool,
     },
 }
