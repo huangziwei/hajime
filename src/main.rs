@@ -44,6 +44,10 @@ enum Commands {
             help = "Override the token for the specified account"
         )]
         override_token: bool,
+
+        /// Use maturin for uploading Rust-based Python projects
+        #[arg(long, help = "Use maturin for uploading Rust-based Python projects")]
+        maturin: bool,
     },
 }
 
@@ -63,8 +67,9 @@ fn main() {
         Commands::Publish {
             account,
             override_token,
+            maturin,
         } => {
-            if let Err(e) = publish::publish_package(account.clone(), *override_token) {
+            if let Err(e) = publish::publish_package(account.clone(), *override_token, *maturin) {
                 eprintln!("Error publishing package: {}", e);
             }
         }
