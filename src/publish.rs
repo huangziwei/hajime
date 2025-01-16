@@ -1,9 +1,7 @@
-// src/publish.rs
-
-use glob::glob;
 use keyring::Entry;
+use std::fs;
 use std::io::{self, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 const SERVICE_NAME: &str = "hajime-cli";
@@ -88,21 +86,14 @@ pub fn publish_package(
         Path::new("Cargo.toml").exists() && Path::new("target/wheels").exists();
 
     if use_maturin || is_rust_python_project {
-        // Find the `.whl` file in the target/wheels directory
-        let mut wheel_path = None;
-        for entry in glob("target/wheels/*.whl").expect("Failed to read glob pattern") {
-            if let Ok(path) = entry {
-                wheel_path = Some(path);
-                break;
-            }
-        }
+        // Find the latest `.whl` file in `target/wheels`
 
-        if let Some(wheel_path) = wheel_path {
-            println!("Using maturin to upload the package: {:?}", wheel_path);
+        if let Some(latest_wheel) = get_latest_wheel_file("target/wheels") {
+            println!("Using maturin to upload the package: {:?}", latest_wheel);
 
             let command = Command::new("maturin")
                 .args(&["upload", "-u", "__token__", "-p", &token])
-                .arg(wheel_path)
+                .arg(latest_wheel)
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .spawn();
@@ -143,9 +134,23 @@ pub fn publish_package(
                 "No dist directory found. Please run 'hajime build' first.",
             ));
         }
+
+        // Determine the latest wheel file
+        let latest_wheel = get_latest_wheel_file("dist");
+        if latest_wheel.is_none() {
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "No .whl file found in the dist directory. Please build the project first.",
+            ));
+        }
+        let latest_wheel = latest_wheel.unwrap();
+
+        println!("Uploading the latest wheel: {:?}", latest_wheel);
+
         // Run twine to publish the package and stream output
         let command = Command::new("twine")
-            .args(&["upload", "dist/*"])
+            .args(&["upload"])
+            .arg(latest_wheel)
             .arg("--username")
             .arg("__token__") // PyPI uses `__token__` as the username for API tokens
             .arg("--password")
@@ -179,4 +184,15 @@ pub fn publish_package(
     }
 
     Ok(())
+}
+
+fn get_latest_wheel_file(directory: &str) -> Option<PathBuf> {
+    let mut files: Vec<_> = fs::read_dir(directory)
+        .ok()?
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().extension().map_or(false, |ext| ext == "whl"))
+        .collect();
+
+    files.sort_by_key(|entry| entry.metadata().and_then(|meta| meta.modified()).ok());
+    files.last().map(|entry| entry.path())
 }

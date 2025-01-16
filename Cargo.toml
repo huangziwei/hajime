@@ -1,6 +1,6 @@
 [package]
 name = "hajime"
-version = "0.3.0"
+version = "0.3.1"
 description = "A Rust CLI tool to create Python project skeletons"
 readme = "README.md" # Path to your README file
 homepage = "https://github.com/huangziwei/hajime"
@@ -15,4 +15,3 @@ edition = "2021"
 clap = { version = "4.0", features = ["derive"] }
 keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 dirs = "6.0"
-glob = "0.3"
