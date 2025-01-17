@@ -67,7 +67,7 @@ version = "0.1.0"
 description = "A Python project named {project_name}"
 authors = []
 requires-python = ">=3.9.0"
-dependencies = []
+dependencies = ["build", "twine", "maturin"]
 readme = {{file = "README.md", content-type = "text/markdown"}}
 
 [project.optional-dependencies]
@@ -171,7 +171,8 @@ include-package-data = true
             );
         }
     } else {
-        println!("`uv` is not installed!");
+        println!("`uv` is not installed! Virtual environment is not created.\n");
+        println!("Follow the instructions at https://docs.astral.sh/uv/#getting-started to install `uv`.");
     }
 
     println!("\nProject '{project_name}' created successfully!");
