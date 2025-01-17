@@ -1,4 +1,6 @@
 mod build;
+mod check;
+pub mod helpers;
 mod new;
 mod publish;
 use clap::{Parser, Subcommand};
@@ -30,7 +32,13 @@ enum Commands {
         force: bool,
     },
     /// Build the Python project
-    Build,
+    Build {
+        /// Use maturin to build the project
+        #[arg(long, help = "Use maturin to build the project")]
+        maturin: bool,
+    },
+    /// Check th build of the Python project
+    Check,
     /// Log in to PyPI by storing the token securely
     Publish {
         /// PyPI account to use (default if not specified)
@@ -63,7 +71,14 @@ fn main() {
                 eprintln!("Error creating project: {}", e);
             }
         }
-        Commands::Build => build::build_project(),
+        Commands::Build { maturin } => {
+            build::build_project(*maturin);
+        }
+        Commands::Check => {
+            if let Err(e) = check::check_package() {
+                eprintln!("Error checking package: {}", e);
+            }
+        }
         Commands::Publish {
             account,
             override_token,

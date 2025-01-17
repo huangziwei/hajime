@@ -60,13 +60,13 @@ By default, `hajime` will use the `default` account stored in your system's keyr
 #### Specify an Account
 
 ```bash
-hajime publish --accounts <account_name>
+hajime publish --account <account_name>
 ```
 
 #### Override the Token for an Account
 
 ```bash
-hajime publish --accounts <account_name> --override-token
+hajime publish --account <account_name> --override-token
 ```
 
 This will:

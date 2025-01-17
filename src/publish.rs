@@ -1,7 +1,8 @@
+use crate::helpers::get_latest_wheel_file;
 use keyring::Entry;
-use std::fs;
+
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 const SERVICE_NAME: &str = "hajime-cli";
@@ -184,15 +185,4 @@ pub fn publish_package(
     }
 
     Ok(())
-}
-
-fn get_latest_wheel_file(directory: &str) -> Option<PathBuf> {
-    let mut files: Vec<_> = fs::read_dir(directory)
-        .ok()?
-        .filter_map(|entry| entry.ok())
-        .filter(|entry| entry.path().extension().map_or(false, |ext| ext == "whl"))
-        .collect();
-
-    files.sort_by_key(|entry| entry.metadata().and_then(|meta| meta.modified()).ok());
-    files.last().map(|entry| entry.path())
 }
