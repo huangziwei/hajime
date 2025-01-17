@@ -66,3 +66,21 @@ pub fn get_latest_wheel_file(directory: &str) -> Option<PathBuf> {
     files.sort_by_key(|entry| entry.metadata().and_then(|meta| meta.modified()).ok());
     files.last().map(|entry| entry.path())
 }
+
+/// Helper function to check if `uv` is installed
+pub fn is_uv_installed() -> bool {
+    Command::new("uv")
+        .arg("--version")
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}
+
+/// Helper function to check if `git` is installed
+pub fn is_git_installed() -> bool {
+    Command::new("git")
+        .arg("--version")
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}

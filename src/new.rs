@@ -1,3 +1,4 @@
+use crate::helpers::{is_git_installed, is_uv_installed};
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
@@ -10,6 +11,7 @@ use std::process::Command;
 /// * `force` - A boolean indicating whether to overwrite an existing project.
 pub fn create_project(project_name: &str, force: bool) -> std::io::Result<()> {
     let base_path = Path::new(project_name);
+    let venv_path: std::path::PathBuf = base_path.join(format!(".{}", project_name));
 
     // Check if the project directory already exists
     if base_path.exists() {
@@ -39,7 +41,7 @@ pub fn create_project(project_name: &str, force: bool) -> std::io::Result<()> {
     let mut main_py = File::create(project_dir.join("main.py"))?;
     writeln!(main_py, "def main():")?;
     writeln!(main_py, "    print('Hello, world!')")?;
-    writeln!(main_py, "\nif __name__ == '__main__':")?;
+    writeln!(main_py, "\n\nif __name__ == '__main__':")?;
     writeln!(main_py, "    main()")?;
 
     // Create the `tests` folder with `__init__.py` and `test_main.py`
@@ -48,8 +50,7 @@ pub fn create_project(project_name: &str, force: bool) -> std::io::Result<()> {
     File::create(tests_dir.join("__init__.py"))?;
     let mut test_main_py = File::create(tests_dir.join("test_main.py"))?;
     writeln!(test_main_py, "from {}.main import main", project_name)?;
-    writeln!(test_main_py, "def test_main():")?;
-    writeln!(test_main_py, "    # Ideally use a proper assert")?;
+    writeln!(test_main_py, "\n\ndef test_main():")?;
     writeln!(test_main_py, "    main()  # Should print 'Hello, world!'")?;
 
     // Create an improved pyproject.toml
@@ -71,8 +72,7 @@ readme = {{file = "README.md", content-type = "text/markdown"}}
 
 [project.optional-dependencies]
 dev = [
-    "black",
-    "isort",
+    "ruff",
     "pytest",
 ]
 
@@ -84,7 +84,12 @@ include-package-data = true
 
     // Create README.md
     let mut readme = File::create(base_path.join("README.md"))?;
-    writeln!(readme, "# {}\n\nA new Python project.", project_name)?;
+    writeln!(readme, "# {}\n\nA new Python project.\n\n", project_name)?;
+    writeln!(
+        readme,
+        "## Installation\n\n```bash\nsource .{}/bin/activate\nuv pip install \".[dev]\"\n```\n",
+        project_name
+    )?;
 
     // Check if Git is installed, then initialize a Git repository
     if is_git_installed() {
@@ -100,6 +105,7 @@ include-package-data = true
         writeln!(gitignore, "__pycache__/")?;
         writeln!(gitignore, "*.py[cod]")?;
         writeln!(gitignore, "*$py.class")?;
+        writeln!(gitignore, ".pytest_cache")?;
         writeln!(gitignore, "")?;
 
         writeln!(gitignore, "# Distribution / packaging")?;
@@ -114,6 +120,7 @@ include-package-data = true
         writeln!(gitignore, ".venv")?;
         writeln!(gitignore, "env/")?;
         writeln!(gitignore, "venv/")?;
+        writeln!(gitignore, ".{project_name}")?;
         writeln!(gitignore, "")?;
 
         writeln!(gitignore, "# Jupyter Notebook")?;
@@ -135,15 +142,38 @@ include-package-data = true
         println!("Warning: Git is not installed. Skipping Git repository initialization.");
     }
 
-    println!("Project '{}' created successfully!", project_name);
-    Ok(())
-}
+    if is_uv_installed() {
+        println!("Detected `uv`. Creating virtual environment...");
+        let uv_command = Command::new("uv")
+            .args(&["venv", &format!(".{}", project_name)])
+            .current_dir(base_path)
+            .output()
+            .expect("Failed to create virtual environment using `uv`.");
 
-/// Helper function to check if Git is installed
-fn is_git_installed() -> bool {
-    Command::new("git")
-        .arg("--version")
-        .output()
-        .map(|output| output.status.success())
-        .unwrap_or(false)
+        if !uv_command.status.success() {
+            eprintln!("Error: Failed to create virtual environment using `uv`.");
+        } else {
+            println!("Virtual environment `.{project_name}` created successfully.\n");
+        }
+
+        // Check if the virtual environment exists
+        if venv_path.exists() {
+            println!("To activate the virtual environment, run:");
+            println!("    source {}", venv_path.display());
+            println!(
+                "\nThis will activate the virtual environment for project '{}'.",
+                project_name
+            );
+        } else {
+            eprintln!(
+                "Error: Virtual environment for project '{}' not found.",
+                project_name
+            );
+        }
+    } else {
+        println!("`uv` is not installed!");
+    }
+
+    println!("\nProject '{project_name}' created successfully!");
+    Ok(())
 }
