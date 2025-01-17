@@ -4,7 +4,11 @@
 
 ## Installation
 
-To install hajime locally, clone this repository and run:
+```bash
+cargo install hajime
+```
+
+Or, to install hajime locally, clone this repository and run:
 
 ```bash
 cargo install --path .
@@ -18,20 +22,15 @@ Make sure `~/.cargo/bin` is in your `PATH`.
 Run the following command to create a new Python project:
 
 ```bash
-hajime new <project_name>
-```
-
-Example:
-```bash
-hajime new my_project
+hajime new project_name
 ```
 
 This creates the following structure:
 ```
-my_project/
+project_name/
 ├── README.md
 ├── pyproject.toml
-├── my_project
+├── project_name
 │   ├── __init__.py
 │   └── main.py
 ├── tests
@@ -48,6 +47,14 @@ hajime build
 
 This runs `python3 -m build` and will package your project and place the distribution files (e.g., `.tar.gz` and `.whl`) in the `dist/` directory.
 
+### Check the build
+
+To check the build, run:
+
+```bash
+hajime check
+```
+
 ### Publish the Project to PyPI
 To publish your project to [PyPI](https://pypi.org), run the following command:
 
@@ -60,13 +67,13 @@ By default, `hajime` will use the `default` account stored in your system's keyr
 #### Specify an Account
 
 ```bash
-hajime publish --account <account_name>
+hajime publish --account account_name
 ```
 
 #### Override the Token for an Account
 
 ```bash
-hajime publish --account <account_name> --override-token
+hajime publish --account account_name --override-token
 ```
 
 This will:
