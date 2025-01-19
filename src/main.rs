@@ -34,8 +34,17 @@ enum Commands {
     /// Build the Python project
     Build {
         /// Use maturin to build the project
-        #[arg(long, help = "Use maturin to build the project")]
+        #[arg(short = 'm', long, help = "Use maturin to build the project")]
         maturin: bool,
+
+        /// Bump the project version (macro, meso, micro)
+        #[arg(
+            short = 'b',
+            long,
+            help = "Bump the project version (macro, meso, micro)",
+            value_parser = ["macro", "meso", "micro"]
+        )]
+        bump_version: Option<String>,
     },
     /// Check th build of the Python project
     Check,
@@ -71,8 +80,11 @@ fn main() {
                 eprintln!("Error creating project: {}", e);
             }
         }
-        Commands::Build { maturin } => {
-            build::build_project(*maturin);
+        Commands::Build {
+            maturin,
+            bump_version,
+        } => {
+            build::build_project(*maturin, bump_version.as_deref());
         }
         Commands::Check => {
             if let Err(e) = check::check_package() {

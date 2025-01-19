@@ -1,8 +1,7 @@
-use crate::helpers::get_latest_wheel_file;
+use crate::helpers::{get_latest_wheel_file, is_rust_python_project};
 use keyring::Entry;
 
 use std::io::{self, Write};
-use std::path::Path;
 use std::process::{Command, Stdio};
 
 const SERVICE_NAME: &str = "hajime-cli";
@@ -83,10 +82,10 @@ pub fn publish_package(
     };
 
     // Detect Rust-based Python project
-    let is_rust_python_project =
-        Path::new("Cargo.toml").exists() && Path::new("target/wheels").exists();
+    // let is_rust_python_project =
+    //     Path::new("Cargo.toml").exists() && Path::new("target/wheels").exists();
 
-    if use_maturin || is_rust_python_project {
+    if use_maturin || is_rust_python_project() {
         // Find the latest `.whl` file in `target/wheels`
 
         if let Some(latest_wheel) = get_latest_wheel_file("target/wheels") {

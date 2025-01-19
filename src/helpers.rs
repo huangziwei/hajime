@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 // Helper function to check if `python` is available
@@ -83,4 +83,9 @@ pub fn is_git_installed() -> bool {
         .output()
         .map(|output| output.status.success())
         .unwrap_or(false)
+}
+
+/// Detects if the project is a Rust-based Python project.
+pub fn is_rust_python_project() -> bool {
+    Path::new("Cargo.toml").exists() && Path::new("target/wheels").exists()
 }
