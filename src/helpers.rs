@@ -89,3 +89,8 @@ pub fn is_git_installed() -> bool {
 pub fn is_rust_python_project() -> bool {
     Path::new("Cargo.toml").exists() && Path::new("target/wheels").exists()
 }
+
+/// Converts kebab-case to snake_case
+pub fn to_snake_case(name: &str) -> String {
+    name.replace('-', "_")
+}

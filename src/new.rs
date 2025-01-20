@@ -1,4 +1,4 @@
-use crate::helpers::{is_git_installed, is_uv_installed};
+use crate::helpers::{is_git_installed, is_uv_installed, to_snake_case};
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
@@ -11,6 +11,8 @@ use std::process::Command;
 /// * `force` - A boolean indicating whether to overwrite an existing project.
 pub fn create_project(project_name: &str, force: bool) -> std::io::Result<()> {
     let base_path = Path::new(project_name);
+    let source_name = to_snake_case(project_name);
+    let source_path = base_path.join(&source_name);
     let venv_path: std::path::PathBuf = base_path.join(format!(".{}", project_name));
 
     // Check if the project directory already exists
@@ -30,28 +32,30 @@ pub fn create_project(project_name: &str, force: bool) -> std::io::Result<()> {
     // Create the base project directory
     fs::create_dir_all(&base_path)?;
 
-    // Create the `project_name` directory inside the base path with `__init__.py` and `main.py`
-    let project_dir = base_path.join(project_name);
-    fs::create_dir_all(&project_dir)?;
+    // Create the source directory inside the base path with `__init__.py` and `main.py`
+    fs::create_dir_all(&source_path)?;
 
     // Create `__init__.py` (empty)
-    File::create(project_dir.join("__init__.py"))?;
+    File::create(source_path.join("__init__.py"))?;
 
     // Create `main.py` with a "Hello, world!" example
-    let mut main_py = File::create(project_dir.join("main.py"))?;
-    writeln!(main_py, "def main():")?;
-    writeln!(main_py, "    print('Hello, world!')")?;
+    let mut main_py = File::create(source_path.join("greet.py"))?;
+    writeln!(main_py, "def hello(name: str = \"world\") -> None:")?;
+    writeln!(main_py, "    print(f\"Hello, {{name}}!\")")?;
     writeln!(main_py, "\n\nif __name__ == '__main__':")?;
-    writeln!(main_py, "    main()")?;
+    writeln!(main_py, "    hello()")?;
 
     // Create the `tests` folder with `__init__.py` and `test_main.py`
     let tests_dir = base_path.join("tests");
     fs::create_dir_all(&tests_dir)?;
     File::create(tests_dir.join("__init__.py"))?;
-    let mut test_main_py = File::create(tests_dir.join("test_main.py"))?;
-    writeln!(test_main_py, "from {}.main import main", project_name)?;
-    writeln!(test_main_py, "\n\ndef test_main():")?;
-    writeln!(test_main_py, "    main()  # Should print 'Hello, world!'")?;
+    let mut test_main_py = File::create(tests_dir.join("test_greet.py"))?;
+    writeln!(test_main_py, "from {source_name}.greet import hello")?;
+    writeln!(test_main_py, "\n\ndef test_hello():")?;
+    writeln!(
+        test_main_py,
+        "    hello(\"test\")  # Should print 'Hello, test!'"
+    )?;
 
     // Create an improved pyproject.toml
     let mut pyproject = File::create(base_path.join("pyproject.toml"))?;
@@ -67,13 +71,16 @@ version = "0.1.0"
 description = "A Python project named {project_name}"
 authors = []
 requires-python = ">=3.9.0"
-dependencies = ["build", "twine", "maturin"]
+dependencies = []
 readme = {{file = "README.md", content-type = "text/markdown"}}
 
 [project.optional-dependencies]
 dev = [
     "ruff",
     "pytest",
+    "build", 
+    "twine", 
+    "maturin"
 ]
 
 [tool.setuptools]
@@ -159,7 +166,7 @@ include-package-data = true
         // Check if the virtual environment exists
         if venv_path.exists() {
             println!("To activate the virtual environment, run:");
-            println!("    source {}", venv_path.display());
+            println!("    source {}/bin/activate", venv_path.display());
             println!(
                 "\nThis will activate the virtual environment for project '{}'.",
                 project_name

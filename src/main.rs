@@ -48,7 +48,7 @@ enum Commands {
     },
     /// Check th build of the Python project
     Check,
-    /// Log in to PyPI by storing the token securely
+    /// Publish the project to PyPI
     Publish {
         /// PyPI account to use (default if not specified)
         #[arg(short, long, help = "PyPI account to use for publishing")]
