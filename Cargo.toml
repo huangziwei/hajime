@@ -1,6 +1,6 @@
 [package]
 name = "hajime"
-version = "0.3.5"
+version = "0.3.6"
 description = "A Rust CLI tool to create Python project skeletons"
 readme = "README.md" 
 homepage = "https://github.com/huangziwei/hajime"
@@ -16,3 +16,4 @@ clap = { version = "4.0", features = ["derive"] }
 keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 toml_edit = "0.22"
 serde_json = "1.0"
+rpassword = "7.3"

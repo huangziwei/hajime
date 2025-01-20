@@ -1,6 +1,6 @@
 use crate::helpers::{get_latest_wheel_file, is_rust_python_project};
 use keyring::Entry;
-
+use rpassword;
 use std::io::{self, Write};
 use std::process::{Command, Stdio};
 
@@ -36,11 +36,17 @@ impl PyPiConfig {
 
     fn prompt_token(&self) -> io::Result<String> {
         println!("No token found for account '{}'", self.account);
-        print!("Please enter your PyPI token: ");
-        io::stdout().flush()?;
+        print!("Please enter your PyPI token (hidden): ");
+        io::stdout().flush()?; // Ensure the prompt is printed before input
 
-        let mut token = String::new();
-        io::stdin().read_line(&mut token)?;
+        // Use rpassword to read the password securely
+        let token = rpassword::read_password().map_err(|e| {
+            io::Error::new(
+                io::ErrorKind::Other,
+                format!("Error reading password: {}", e),
+            )
+        })?;
+
         Ok(token.trim().to_string())
     }
 
