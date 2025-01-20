@@ -155,6 +155,7 @@ fn build_with_python() {
     let command = Command::new("python")
         .arg("-m")
         .arg("build")
+        .arg("--no-isolation")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn();

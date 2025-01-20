@@ -13,7 +13,7 @@ pub fn create_project(project_name: &str, force: bool) -> std::io::Result<()> {
     let base_path = Path::new(project_name);
     let source_name = to_snake_case(project_name);
     let source_path = base_path.join(&source_name);
-    let venv_path: std::path::PathBuf = base_path.join(format!(".{}", project_name));
+    let venv_path: std::path::PathBuf = base_path.join(".venv");
 
     // Check if the project directory already exists
     if base_path.exists() {
@@ -80,7 +80,9 @@ dev = [
     "pytest",
     "build", 
     "twine", 
-    "maturin"
+    "maturin",
+    "setuptools",
+    "wheel",
 ]
 
 [tool.setuptools]
@@ -127,7 +129,6 @@ include-package-data = true
         writeln!(gitignore, ".venv")?;
         writeln!(gitignore, "env/")?;
         writeln!(gitignore, "venv/")?;
-        writeln!(gitignore, ".{project_name}")?;
         writeln!(gitignore, "")?;
 
         writeln!(gitignore, "# Jupyter Notebook")?;
@@ -152,7 +153,7 @@ include-package-data = true
     if is_uv_installed() {
         println!("Detected `uv`. Creating virtual environment...");
         let uv_command = Command::new("uv")
-            .args(&["venv", &format!(".{}", project_name)])
+            .args(&["venv", ".venv"])
             .current_dir(base_path)
             .output()
             .expect("Failed to create virtual environment using `uv`.");
@@ -160,7 +161,7 @@ include-package-data = true
         if !uv_command.status.success() {
             eprintln!("Error: Failed to create virtual environment using `uv`.");
         } else {
-            println!("Virtual environment `.{project_name}` created successfully.\n");
+            println!("Virtual environment `.venv` created successfully.\n");
         }
 
         // Check if the virtual environment exists
