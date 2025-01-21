@@ -1,6 +1,6 @@
 [package]
 name = "hajime"
-version = "0.3.9"
+version = "0.3.10"
 description = "A Rust CLI tool to create Python project skeletons"
 readme = "README.md" 
 homepage = "https://github.com/huangziwei/hajime"

@@ -18,8 +18,8 @@ pub fn check_package() -> io::Result<()> {
     println!("Running twine check on {}...", dist_dir);
 
     // Run twine check on the determined directory
-    let command = Command::new("twine")
-        .args(&["check", dist_dir])
+    let command = Command::new("uv")
+        .args(&["run", "twine", "check", dist_dir])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn();

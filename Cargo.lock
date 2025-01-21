@@ -228,7 +228,7 @@ dependencies = [
 
 [[package]]
 name = "hajime"
-version = "0.3.9"
+version = "0.3.10"
 dependencies = [
  "clap",
  "keyring",
