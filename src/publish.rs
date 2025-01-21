@@ -154,8 +154,8 @@ pub fn publish_package(
         println!("Uploading the latest wheel: {:?}", latest_wheel);
 
         // Run twine to publish the package and stream output
-        let command = Command::new("twine")
-            .args(&["upload"])
+        let command = Command::new("uv")
+            .args(&["run", "twine", "upload"])
             .arg(latest_wheel)
             .arg("--username")
             .arg("__token__") // PyPI uses `__token__` as the username for API tokens
