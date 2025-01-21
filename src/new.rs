@@ -62,8 +62,8 @@ pub fn create_project(project_name: &str, force: bool) -> std::io::Result<()> {
     writeln!(
         pyproject,
         r#"[build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "{project_name}"
@@ -78,11 +78,8 @@ readme = {{file = "README.md", content-type = "text/markdown"}}
 dev = [
     "ruff",
     "pytest",
-    "build", 
     "twine", 
     "maturin",
-    "setuptools",
-    "wheel",
 ]
 
 [tool.setuptools]
@@ -177,6 +174,19 @@ include-package-data = true
                 "Error: Virtual environment for project '{}' not found.",
                 project_name
             );
+        }
+
+        // Install the current packages in the virtual environment
+        let uv_pip_install = Command::new("uv")
+            .args(&["pip", "install", "-e", ".[dev]"])
+            .current_dir(base_path)
+            .output()
+            .expect("Failed to install the project in the virtual environment.");
+
+        if !uv_pip_install.status.success() {
+            eprintln!("Error: Failed to install the project in the virtual environment.");
+        } else {
+            println!("Project installed successfully in the virtual environment.\n");
         }
     } else {
         println!("`uv` is not installed! Virtual environment is not created.\n");

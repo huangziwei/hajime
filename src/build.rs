@@ -1,6 +1,4 @@
-use crate::helpers::{
-    get_python_info, is_maturin_available, is_python_available, is_rust_python_project,
-};
+use crate::helpers::{is_maturin_available, is_rust_python_project, is_uv_installed};
 use serde_json;
 use std::fs;
 use std::process::{Command, Stdio};
@@ -134,28 +132,18 @@ pub fn build_project(use_maturin: bool, bump_version_level: Option<&str>) {
                 return;
             }
         }
-        build_with_python();
+        build_with_uv();
     }
 }
 
-fn build_with_python() {
-    if !is_python_available() {
-        eprintln!("Error: `python` is not installed or not found in PATH.");
-        return;
+fn build_with_uv() {
+    if !is_uv_installed() {
+        eprintln!("Error: `uv` is not installed or not found in PATH.");
     }
 
-    if let Some((python_path, python_version)) = get_python_info() {
-        println!("Found {} at {}", python_version, python_path);
-    } else {
-        eprintln!("Error: Unable to determine Python path or version.");
-        return;
-    }
-
-    println!("Building the Python project using `python -m build`...");
-    let command = Command::new("python")
-        .arg("-m")
+    println!("Building the Python project using `uv build`...");
+    let command = Command::new("uv")
         .arg("build")
-        .arg("--no-isolation")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn();
