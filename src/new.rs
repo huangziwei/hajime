@@ -164,7 +164,7 @@ include-package-data = true
         // Check if the virtual environment exists
         if venv_path.exists() {
             println!("To activate the virtual environment, run:");
-            println!("    source {}/bin/activate", venv_path.display());
+            println!("    source .venv/bin/activate");
             println!(
                 "\nThis will activate the virtual environment for project '{}'.",
                 project_name
