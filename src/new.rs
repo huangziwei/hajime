@@ -93,8 +93,7 @@ include-package-data = true
     writeln!(readme, "# {}\n\nA new Python project.\n\n", project_name)?;
     writeln!(
         readme,
-        "## Installation\n\n```bash\nsource .{}/bin/activate\nuv pip install \".[dev]\"\n```\n",
-        project_name
+        "## Installation\n\n```bash\nsource .venv/bin/activate\nuv pip install \".[dev]\"\n```\n",
     )?;
 
     // Check if Git is installed, then initialize a Git repository
